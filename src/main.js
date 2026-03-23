@@ -5,20 +5,27 @@ await Actor.init();
 
 const input = await Actor.getInput();
 const {
-    keywords = 'software engineering intern',
+    keywords = ['software engineering intern'],
     location = 'United States',
+    jobType = 'I',
+    datePosted = 'r86400',
     maxJobs = 10,
 } = input ?? {};
 
-const searchUrl = `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(keywords)}&location=${encodeURIComponent(location)}&f_JT=I&f_TPR=r86400`;
+// Build one URL per keyword
+const urls = keywords.map(keyword =>
+    `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(keyword)}&location=${encodeURIComponent(location)}&f_JT=${jobType}&f_TPR=${datePosted}`
+);
 
 const results = [];
 
 const crawler = new PlaywrightCrawler({
     headless: true,
-    maxRequestsPerCrawl: 5,
+    maxRequestsPerCrawl: urls.length * 2,
 
-    async requestHandler({ page }) {
+    async requestHandler({ page, request }) {
+        const keyword = request.userData.keyword;
+
         await page.waitForSelector('.jobs-search__results-list', { timeout: 15000 });
 
         const jobs = await page.evaluate((max) => {
@@ -41,11 +48,16 @@ const crawler = new PlaywrightCrawler({
             return data;
         }, maxJobs);
 
-        results.push(...jobs);
+        results.push(...jobs.map(job => ({ ...job, keyword })));
     },
 });
 
-await crawler.run([searchUrl]);
+await crawler.run(
+    urls.map((url, i) => ({
+        url,
+        userData: { keyword: keywords[i] }
+    }))
+);
 
 await Actor.pushData(results);
 await Actor.exit();

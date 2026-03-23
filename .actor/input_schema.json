@@ -1,28 +1,46 @@
 {
-    "schemaVersion": 1,
-    "title": "LinkedIn Jobs Scraper",
-    "type": "object",
-    "properties": {
-      "keywords": {
-        "title": "Search Keywords",
-        "type": "string",
-        "description": "Keywords to search for on LinkedIn Jobs (e.g. software engineering intern)",
-        "editor": "textfield",
-        "default": "software engineering intern"
-      },
-      "location": {
-        "title": "Location",
-        "type": "string",
-        "description": "Location to search for jobs (e.g. United States)",
-        "editor": "textfield",
-        "default": "United States"
-      },
-      "maxJobs": {
-        "title": "Max Jobs",
-        "type": "integer",
-        "description": "Maximum number of job listings to scrape",
-        "editor": "number",
-        "default": 10
-      }
+  "schemaVersion": 1,
+  "title": "LinkedIn Jobs Scraper",
+  "type": "object",
+  "properties": {
+    "keywords": {
+      "title": "Search Keywords",
+      "type": "array",
+      "description": "List of job titles to search for (e.g. software engineering intern, data science intern)",
+      "editor": "stringList",
+      "default": ["software engineering intern"]
+    },
+    "location": {
+      "title": "Location",
+      "type": "string",
+      "description": "Location to search for jobs (e.g. United States, New York)",
+      "editor": "textfield",
+      "default": "United States"
+    },
+    "jobType": {
+      "title": "Job Type",
+      "type": "string",
+      "description": "Type of job to filter by",
+      "editor": "select",
+      "enum": ["", "F", "P", "C", "T", "V", "I", "O"],
+      "enumTitles": ["Any", "Full-time", "Part-time", "Contract", "Temporary", "Volunteer", "Internship", "Other"],
+      "default": "I"
+    },
+    "datePosted": {
+      "title": "Date Posted",
+      "type": "string",
+      "description": "How recently the job was posted",
+      "editor": "select",
+      "enum": ["", "r86400", "r604800", "r2592000"],
+      "enumTitles": ["Any time", "Past 24 hours", "Past week", "Past month"],
+      "default": "r86400"
+    },
+    "maxJobs": {
+      "title": "Max Jobs Per Keyword",
+      "type": "integer",
+      "description": "Maximum number of job listings to scrape per keyword",
+      "editor": "number",
+      "default": 10
     }
   }
+}

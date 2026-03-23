@@ -1,0 +1,28 @@
+{
+    "schemaVersion": 1,
+    "title": "LinkedIn Jobs Scraper",
+    "type": "object",
+    "properties": {
+      "keywords": {
+        "title": "Search Keywords",
+        "type": "string",
+        "description": "Keywords to search for on LinkedIn Jobs (e.g. software engineering intern)",
+        "editor": "textfield",
+        "default": "software engineering intern"
+      },
+      "location": {
+        "title": "Location",
+        "type": "string",
+        "description": "Location to search for jobs (e.g. United States)",
+        "editor": "textfield",
+        "default": "United States"
+      },
+      "maxJobs": {
+        "title": "Max Jobs",
+        "type": "integer",
+        "description": "Maximum number of job listings to scrape",
+        "editor": "number",
+        "default": 10
+      }
+    }
+  }

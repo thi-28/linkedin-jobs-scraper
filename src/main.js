@@ -48,7 +48,7 @@ const crawler = new PlaywrightCrawler({
             return data;
         }, maxJobs);
 
-        results.push(...jobs.map(job => ({ ...job, keyword })));
+        results.push(...jobs.map(job => ({ ...jobs})));
     },
 });
 

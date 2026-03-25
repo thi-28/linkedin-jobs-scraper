@@ -10,54 +10,31 @@ const {
     jobType = 'I',
     datePosted = 'r86400',
     maxJobs = 10,
+    resumeStoreId = null,
 } = input ?? {};
 
-// Build one URL per keyword
-const urls = keywords.map(keyword =>
-    `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(keyword)}&location=${encodeURIComponent(location)}&f_JT=${jobType}&f_TPR=${datePosted}`
-);
+// ---- LOAD RESUMES FROM PRIVATE KEY-VALUE STORE ----
+let candidateProfile = '';
 
-const results = [];
+try {
+    const store = await Actor.openKeyValueStore('candidate-resumes', { forceCloud: true });
+    const swеResume = await store.getValue('resume_swe') ?? '';
+    const dsResume = await store.getValue('resume_data_science') ?? '';
+    const generalResume = await store.getValue('resume_general') ?? '';
 
-const crawler = new PlaywrightCrawler({
-    headless: true,
-    maxRequestsPerCrawl: urls.length * 2,
+    candidateProfile = `
+=== SOFTWARE ENGINEERING RESUME ===
+${sweResume}
 
-    async requestHandler({ page, request }) {
-        const keyword = request.userData.keyword;
+=== DATA SCIENCE RESUME ===
+${dsResume}
 
-        await page.waitForSelector('.jobs-search__results-list', { timeout: 15000 });
+=== GENERAL RESUME ===
+${generalResume}
+    `.trim();
 
-        const jobs = await page.evaluate((max) => {
-            const items = document.querySelectorAll('.jobs-search__results-list li');
-            const data = [];
-
-            items.forEach((item, i) => {
-                if (i >= max) return;
-                const title = item.querySelector('.base-search-card__title')?.innerText?.trim();
-                const company = item.querySelector('.base-search-card__subtitle')?.innerText?.trim();
-                const location = item.querySelector('.job-search-card__location')?.innerText?.trim();
-                const link = item.querySelector('a.base-card__full-link')?.href;
-                const date = item.querySelector('time')?.getAttribute('datetime');
-
-                if (title && link) {
-                    data.push({ title, company, location, link, date });
-                }
-            });
-
-            return data;
-        }, maxJobs);
-
-        results.push(...jobs.map(job => ({ ...job})));
-    },
-});
-
-await crawler.run(
-    urls.map((url, i) => ({
-        url,
-        userData: { keyword: keywords[i] }
-    }))
-);
-
-await Actor.pushData(results);
-await Actor.exit();
+    console.log('Successfully loaded resumes from Key-Value Store');
+} catch (err) {
+    console.warn('Could not load resumes, using fallback profile', err);
+    candidateProfile = 'Masters student in Computer Science seeking internships.';
+}

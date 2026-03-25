@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "title": "LinkedIn Internship Scraper v3",
+  "title": "LinkedIn Job Scraper v3",
   "type": "object",
   "properties": {
     "keywords": {
@@ -9,11 +9,7 @@
       "description": "List of job titles to search for on LinkedIn. Each keyword runs a separate search.",
       "editor": "stringList",
       "default": [
-        "AI research intern",
-        "machine learning intern",
-        "NLP intern",
-        "software engineering intern",
-        "data science intern"
+        "AI research intern"
       ]
     },
     "location": {
@@ -44,7 +40,7 @@
     "maxJobs": {
       "title": "Max Jobs Per Keyword",
       "type": "integer",
-      "description": "Maximum number of job listings to scrape per keyword search (e.g. 5 keywords * 10 jobs = 50 total before deduplication)",
+      "description": "Maximum number of job listings to scrape per keyword search (e.g. 5 keywords × 10 jobs = 50 total before deduplication)",
       "editor": "number",
       "default": 10
     }

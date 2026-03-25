@@ -1,40 +1,32 @@
-import { Actor } from 'apify';
-import { PlaywrightCrawler } from '@crawlee/playwright';
-
-await Actor.init();
-
-const input = await Actor.getInput();
-const {
-    keywords = ['software engineering intern'],
-    location = 'United States',
-    jobType = 'I',
-    datePosted = 'r86400',
-    maxJobs = 10,
-    resumeStoreId = null,
-} = input ?? {};
-
-// ---- LOAD RESUMES FROM PRIVATE KEY-VALUE STORE ----
+// ─────────────────────────────────────────────
+// LOAD RESUMES FROM PRIVATE APIFY KEY-VALUE STORE
+// Add any number of keys starting with "resume_"
+// e.g. resume_swe, resume_ai, resume_data, resume_pm, etc.
+// ─────────────────────────────────────────────
 let candidateProfile = '';
 
 try {
     const store = await Actor.openKeyValueStore('candidate-resumes', { forceCloud: true });
-    const swеResume = await store.getValue('resume_swe') ?? '';
-    const dsResume = await store.getValue('resume_data_science') ?? '';
-    const generalResume = await store.getValue('resume_general') ?? '';
+    
+    // Dynamically find all keys that start with "resume_"
+    const resumeSections = [];
+    await store.forEachKey(async (key) => {
+        if (key.startsWith('resume_')) {
+            const value = await store.getValue(key);
+            if (value) {
+                const label = key.replace('resume_', '').toUpperCase().replace(/_/g, ' ');
+                resumeSections.push(`=== ${label} RESUME ===\n${value}`);
+                console.log(`Loaded resume: ${key}`);
+            }
+        }
+    });
 
-    candidateProfile = `
-=== SOFTWARE ENGINEERING RESUME ===
-${sweResume}
+    candidateProfile = resumeSections.length > 0
+        ? resumeSections.join('\n\n')
+        : getFallbackProfile();
 
-=== DATA SCIENCE RESUME ===
-${dsResume}
-
-=== GENERAL RESUME ===
-${generalResume}
-    `.trim();
-
-    console.log('Successfully loaded resumes from Key-Value Store');
+    console.log(`Total resumes loaded: ${resumeSections.length}`);
 } catch (err) {
-    console.warn('Could not load resumes, using fallback profile', err);
-    candidateProfile = 'Masters student in Computer Science seeking internships.';
+    console.warn('Could not load resumes from store, using fallback:', err.message);
+    candidateProfile = getFallbackProfile();
 }
